@@ -24,9 +24,27 @@ sudo apt-get install xvfb fluxbox scrot xdotool
 
 ## Installation
 
+**One-line install (Recommended)**
+
 ```bash
-pip install background-computer-skill
+curl -fsSL https://raw.githubusercontent.com/ziuus/background-computer-skill/main/install.sh | bash
 ```
+*(This script automatically installs `xvfb`, `fluxbox`, and sets up the tool via `pipx` in an isolated environment).*
+
+**Manual Installation (pipx)**
+
+```bash
+pipx install git+https://github.com/ziuus/background-computer-skill.git
+```
+
+**Docker (Universal cross-platform)**
+
+If you are on Windows or macOS without X11, or just want a fully sandboxed environment:
+```bash
+docker build -t background-computer-skill .
+docker run -d --name bg-computer background-computer-skill
+```
+*Note: For MCP over stdio with Docker, you can configure your agent to use `docker exec -i bg-computer bg-computer mcp`.*
 
 ## Usage
 
