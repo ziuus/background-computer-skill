@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "background-computer-skill"
+version = "0.1.0"
+description = "Let AI agents use your real machine without interrupting your work. CLI + MCP for headless virtual desktop."
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "Zius", email = "zius@example.com"}
+]
+dependencies = [
+    "click>=8.0.0",
+    "mcp>=1.0.0",
+    "PyAutoGUI>=0.9.54"
+]
+
+[project.scripts]
+bg-computer = "background_computer.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["background_computer"]
