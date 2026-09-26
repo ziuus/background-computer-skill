@@ -61,5 +61,59 @@ def mcp(display):
     from .mcp_server import run_server
     run_server()
 
+@main.command()
+@click.option('--display', default=99, help='Background display to mirror (default 99)')
+@click.option('--fps', default=5, help='Target refresh rate (FPS)')
+def view(display, fps):
+    """
+    Open a live Picture-in-Picture preview window of the agent's background desktop.
+    Runs on your main display (:0) so you can monitor what the agent is doing.
+    """
+    import tkinter as tk
+    from PIL import Image, ImageTk
+    import pyautogui
+
+    # Save original DISPLAY (usually :0) for viewer window
+    main_display = os.environ.get("DISPLAY", ":0")
+    if main_display == f":{display}":
+        main_display = ":0"
+
+    target_display = f":{display}"
+    click.echo(f"Opening live view of background display {target_display} on {main_display}...")
+
+    root = tk.Tk()
+    root.title(f"Background Computer Monitor ({target_display})")
+    root.geometry("640x400")
+    root.attributes('-topmost', True) # Keep preview on top
+
+    label = tk.Label(root)
+    label.pack(fill="both", expand=True)
+
+    interval_ms = int(1000 / fps)
+
+    def update_frame():
+        try:
+            # Temporarily set DISPLAY to target display to take screenshot
+            os.environ["DISPLAY"] = target_display
+            img = pyautogui.screenshot()
+            
+            # Resize image to fit preview window
+            w = max(1, root.winfo_width())
+            h = max(1, root.winfo_height())
+            img = img.resize((w, h), Image.Resampling.LANCZOS)
+            
+            tk_img = ImageTk.PhotoImage(img)
+            label.config(image=tk_img)
+            label.image = tk_img
+        except Exception as e:
+            label.config(text=f"Waiting for display {target_display}...\n{e}")
+        finally:
+            os.environ["DISPLAY"] = main_display
+            root.after(interval_ms, update_frame)
+
+    update_frame()
+    root.mainloop()
+
 if __name__ == '__main__':
     main()
+

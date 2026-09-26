@@ -87,6 +87,16 @@ Add this to your `mcp.json` (Claude Desktop, Antigravity, Cursor, etc.):
 }
 ```
 
+### 3. Live Picture-in-Picture Monitor (Optional)
+
+If you want to watch the agent work in real-time without letting it touch your real mouse or keyboard, run:
+
+```bash
+bg-computer view
+```
+
+This opens a lightweight floating preview window on your primary desktop (`DISPLAY=:0`) that mirrors the agent's background screen (`DISPLAY=:99`) in real-time. You can close or minimize it at any time while the agent continues running in the background.
+
 ---
 
 ## 🧰 Available MCP Tools
