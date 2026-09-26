@@ -1,35 +1,50 @@
 # Background Computer Skill 🖥️👻
 
-Let AI agents use your real machine, with your real files and login sessions, **without interrupting your work**.
+Give AI agents their own virtual desktop — running in the background while you keep working normally.
 
-Inspired by [BrowserSkill](https://github.com/Tencent/BrowserSkill), this project provides a CLI and an [MCP (Model Context Protocol)](https://modelcontextprotocol.io/) server that runs a fully functional, headless virtual desktop in the background. AI agents can open browsers, run GUI apps, type, and click around without ever hijacking your physical mouse or screen.
+Inspired by [BrowserSkill](https://github.com/Tencent/BrowserSkill), **Background Computer Skill** provides an [MCP (Model Context Protocol)](https://modelcontextprotocol.io/) server and CLI that creates a headless X11 display for AI agents. Instead of fighting you for your physical mouse and screen, agents operate on an isolated display while retaining access to your local machine's environment.
 
-## Why?
+---
 
-Standard AI "Computer Use" APIs (like Anthropic's) take control of your main screen. The mouse moves, windows pop up, and you can't touch your computer while the agent is working. 
+## 💡 Architecture & Design
 
-**Background Computer Skill** fixes this by containerizing the graphical environment (using Xvfb on Linux) while keeping the same user permissions, filesystem access, and local sessions. 
+Standard AI "Computer Use" APIs (like Anthropic's) operate directly on your primary display (`DISPLAY=:0`), hijacking your cursor and stealing window focus.
 
-- 👻 **Invisible to you:** The agent gets its own virtual display.
-- 🔐 **Real identity:** It runs as your user, meaning it has access to your logged-in browser profiles, ssh keys, and local files.
-- 🤖 **Universal Agent Support:** Runs as a standard MCP server. Compatible with Claude Desktop, Antigravity, Cursor, and any other MCP-capable agent.
+**Background Computer Skill** separates the human desktop from the agent desktop:
 
-## Prerequisites
-
-Currently optimized for Linux (or WSL2).
-
-```bash
-sudo apt-get install xvfb fluxbox scrot xdotool
+```
+                  SAME USER / SAME HOST
+                           │
+             ┌─────────────┴─────────────┐
+             │                           │
+       User Session                  Agent Session
+       (DISPLAY=:0)                  (DISPLAY=:99)
+             │                           │
+       ┌───────────┐              ┌───────────┐
+       │ Physical  │              │ Xvfb      │
+       │ Desktop   │              │ Display   │
+       └───────────┘              └─────┬─────┘
+                                       │
+                                   Fluxbox WM
+                                       │
+                                  Computer Use
 ```
 
-## Installation
+### Modes of Operation
 
-**One-line install (Recommended)**
+- **Native Mode (Default):** Runs as your host user on `DISPLAY=:99`. The agent shares your machine's environment (filesystem, installed software, project directories, CLI credentials, environment variables, network) while its GUI applications run silently on the background display.
+- **Docker Mode:** Runs inside an isolated Ubuntu container. Best when you prefer strong sandbox isolation or are running on macOS/Windows without X11.
+
+---
+
+## 🚀 Installation
+
+**One-line install (Recommended for Linux / WSL2)**
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/ziuus/background-computer-skill/main/install.sh | bash
 ```
-*(This script automatically installs `xvfb`, `fluxbox`, and sets up the tool via `pipx` in an isolated environment).*
+*(This script installs `xvfb`, `fluxbox`, `xdotool`, `scrot`, and sets up `bg-computer` via `pipx`).*
 
 **Manual Installation (pipx)**
 
@@ -37,30 +52,29 @@ curl -fsSL https://raw.githubusercontent.com/ziuus/background-computer-skill/mai
 pipx install git+https://github.com/ziuus/background-computer-skill.git
 ```
 
-**Docker (Universal cross-platform)**
+**Docker (Container Sandbox)**
 
-If you are on Windows or macOS without X11, or just want a fully sandboxed environment:
 ```bash
 docker build -t background-computer-skill .
 docker run -d --name bg-computer background-computer-skill
 ```
-*Note: For MCP over stdio with Docker, you can configure your agent to use `docker exec -i bg-computer bg-computer mcp`.*
+*MCP with Docker: Configure your agent to run `docker exec -i bg-computer bg-computer mcp`.*
 
-## Usage
+---
+
+## 🛠️ Usage
 
 ### 1. Start the Background Server
-
-Run this to spin up the virtual desktop and the MCP server:
 
 ```bash
 bg-computer start
 ```
 
-This creates a hidden X11 display (usually `:99`), starts a lightweight window manager (`fluxbox`), and launches the MCP server on `stdio` or a local port.
+This creates an in-memory X11 display (`:99`), starts a lightweight window manager (`fluxbox`), and prepares the environment for computer-use actions.
 
 ### 2. Configure Your Agent (MCP)
 
-Add this to your `mcp.json` or agent configuration:
+Add this to your `mcp.json` (Claude Desktop, Antigravity, Cursor, etc.):
 
 ```json
 {
@@ -73,23 +87,22 @@ Add this to your `mcp.json` or agent configuration:
 }
 ```
 
-## Available MCP Tools
+---
 
-Once connected, your agent will have access to the following tools, which strictly operate *only* inside the background desktop:
+## 🧰 Available MCP Tools
 
-- `screenshot`: Capture the background display.
-- `mouse_move`: Move the cursor to (x, y).
-- `mouse_click`: Click (left, right, middle).
-- `keyboard_type`: Type a string of text.
-- `keyboard_key`: Press specific hotkeys (e.g., `Return`, `ctrl+c`).
-- `run_command`: Execute a shell command inside the background display (e.g., `google-chrome`).
+Agents connected to the MCP server can execute computer-use actions strictly isolated within `DISPLAY=:99`:
 
-## Architecture
+- `screenshot`: Capture the current frame of the background desktop.
+- `mouse_move`: Move the cursor to target `[x, y]` coordinates.
+- `mouse_click`: Click (`left`, `right`, `middle`, `double_click`).
+- `keyboard_type`: Type strings of text.
+- `keyboard_key`: Send hotkeys and special keys (e.g. `Return`, `ctrl+c`, `Tab`).
+- `run_command`: Launch terminal commands or GUI apps (e.g. `google-chrome`) inside the background display.
 
-- **Xvfb (X Virtual Framebuffer):** Creates an in-memory display server.
-- **Fluxbox:** A lightweight window manager so apps behave normally (can be resized, moved).
-- **xdotool / scrot:** For stable headless input and screenshots.
-- **MCP (Model Context Protocol):** Standardized interface for LLMs to invoke tools.
+---
 
-## License
+## 📜 License
+
 MIT
+
