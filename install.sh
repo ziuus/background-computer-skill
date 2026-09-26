@@ -32,5 +32,12 @@ export PATH="$HOME/.local/bin:$PATH"
 echo "Installing background-computer-skill via pipx..."
 pipx install git+https://github.com/ziuus/background-computer-skill.git --force
 
+# Install SKILL.md into global agent configuration directory
+SKILL_DIR="$HOME/.gemini/config/skills/background-computer"
+mkdir -p "$SKILL_DIR"
+curl -fsSL https://raw.githubusercontent.com/ziuus/background-computer-skill/main/SKILL.md -o "$SKILL_DIR/SKILL.md"
+
 echo "✅ Installation complete!"
-echo "You can now run: bg-computer start"
+echo "• Skill prompt registered at: $SKILL_DIR/SKILL.md"
+echo "• Start server with: bg-computer start"
+

@@ -87,7 +87,23 @@ Add this to your `mcp.json` (Claude Desktop, Antigravity, Cursor, etc.):
 }
 ```
 
-### 3. Live Picture-in-Picture Monitor (Optional)
+### 3. Register the Agent Skill (`SKILL.md`)
+
+In addition to the MCP server, you can give your AI agent the operational rules and prompt instructions by copying [`SKILL.md`](./SKILL.md) into your agent's skill directory:
+
+**For Antigravity / Agentic Coding Assistants:**
+```bash
+mkdir -p ~/.gemini/config/skills/background-computer
+curl -fsSL https://raw.githubusercontent.com/ziuus/background-computer-skill/main/SKILL.md -o ~/.gemini/config/skills/background-computer/SKILL.md
+```
+
+**For Project-Level Workspace (.agents/):**
+```bash
+mkdir -p .agents/skills/background-computer
+curl -fsSL https://raw.githubusercontent.com/ziuus/background-computer-skill/main/SKILL.md -o .agents/skills/background-computer/SKILL.md
+```
+
+### 4. Live Picture-in-Picture Monitor (Optional)
 
 If you want to watch the agent work in real-time without letting it touch your real mouse or keyboard, run:
 
