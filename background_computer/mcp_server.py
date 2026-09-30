@@ -1,7 +1,24 @@
 import os
 import subprocess
 import base64
-import pyautogui
+import sys
+import warnings
+import io
+import contextlib
+
+# Suppress Xlib warnings that corrupt JSON-RPC stdout
+warnings.filterwarnings("ignore", category=UserWarning, module="Xlib")
+os.environ.setdefault("XDG_SESSION_TYPE", "x11")
+# Ensure HOME is set for Xlib/Xauthority
+os.environ.setdefault("HOME", "/home/zius")
+os.environ.setdefault("XAUTHORITY", "/home/zius/.Xauthority")
+
+# Redirect stdout during pyautogui import to capture Xlib warnings
+_stdout = sys.stdout
+sys.stdout = io.StringIO()
+with contextlib.redirect_stdout(io.StringIO()):
+    import pyautogui
+sys.stdout = _stdout
 from io import BytesIO
 from mcp.server.fastmcp import FastMCP
 from pydantic import BaseModel, Field
